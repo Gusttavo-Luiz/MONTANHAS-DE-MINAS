@@ -1,0 +1,254 @@
+---
+import Icon from './Icon.astro';
+import Landscape from './Landscape.astro';
+import { Picture } from 'astro:assets';
+import { getPhoto } from '../lib/photos';
+import { featuredPhotos } from '../content/photos';
+import { site, mapLinks, formatRating } from '../config/site';
+
+const heroPhoto = getPhoto(featuredPhotos.hero.file);
+---
+
+<section class="hero on-dark" id="inicio" aria-labelledby="hero-title">
+  <div class="hero__media" data-parallax>
+    {
+      heroPhoto ? (
+        <Picture
+          src={heroPhoto}
+          alt={featuredPhotos.hero.alt}
+          widths={[640, 960, 1440, 1920, 2560].filter((w) => w <= heroPhoto.width)}
+          sizes="100vw"
+          formats={['avif', 'webp']}
+          loading="eager"
+          fetchpriority="high"
+          class="hero__photo"
+        />
+      ) : (
+        <Landscape />
+      )
+    }
+    <div class:list={['hero__shade', { 'hero__shade--photo': heroPhoto }]}></div>
+  </div>
+
+  <div class="hero__content container">
+    <p class="eyebrow hero__eyebrow" data-reveal>Restaurante em Itaúna · Minas Gerais</p>
+    <h1 class="hero__title" id="hero-title" data-reveal style="--reveal-delay:120">
+      Sabores de Minas, <em>momentos para recordar.</em>
+    </h1>
+    <p class="hero__text" data-reveal style="--reveal-delay:240">
+      Uma experiência de sabor, tradição e aconchego no coração do interior mineiro. Venha viver bons momentos no
+      Montanhas de Minas.
+    </p>
+    <div class="hero__actions" data-reveal style="--reveal-delay:360">
+      <a class="btn btn--terracotta btn--lg" href="#cardapio">
+        Conheça nosso cardápio <Icon name="arrowRight" class="icon--move" />
+      </a>
+      <a class="btn btn--ghost-light btn--lg" href={mapLinks.directions} target="_blank" rel="noopener">
+        <Icon name="route" /> Como chegar<span class="sr-only"> (abre o Google Maps em nova aba)</span>
+      </a>
+    </div>
+
+    <ul class="hero__facts" data-reveal style="--reveal-delay:480">
+      <li>
+        <span class="hero__rating">
+          <Icon name="star" size={16} class="hero__star" />
+          <strong>{formatRating(site.googleRating)}</strong>
+        </span>
+        <span>Nota no Google</span>
+      </li>
+      <li>
+        <Icon name="utensils" size={18} />
+        <span>Culinária mineira e brasileira</span>
+      </li>
+      <li>
+        <Icon name="leaf" size={18} />
+        <span>Ambiente familiar em meio à natureza</span>
+      </li>
+    </ul>
+  </div>
+
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    min-height: 100svh;
+    min-height: max(640px, 100svh);
+    max-height: 1000px;
+    overflow: hidden;
+    isolation: isolate;
+    color: var(--cream-light);
+    background: var(--green-night);
+  }
+
+  .hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+
+  .hero__media :global(.landscape),
+  .hero__media :global(.hero__photo),
+  .hero__media :global(picture) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero__shade {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgb(20 33 25 / 0.45), transparent 26%),
+      linear-gradient(90deg, rgb(20 33 25 / 0.72), rgb(20 33 25 / 0.35) 48%, transparent 72%);
+  }
+
+  .hero__shade--photo {
+    background:
+      linear-gradient(180deg, rgb(20 33 25 / 0.35), transparent 30%, transparent 55%, rgb(20 33 25 / 0.55)),
+      linear-gradient(90deg, rgb(20 33 25 / 0.45), transparent 70%);
+  }
+
+  .hero__content {
+    align-self: center;
+    padding-top: calc(var(--header-h) + 2rem);
+    padding-bottom: clamp(2.5rem, 2rem + 2vw, 4rem);
+  }
+
+  .hero__title {
+    max-width: 13ch;
+    margin-top: 1.4rem;
+    font-size: clamp(2.6rem, 1.5rem + 4vw, 5.1rem);
+    font-weight: 420;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+  }
+
+  .hero__title em {
+    display: block;
+    color: var(--gold-light);
+  }
+
+  .hero__text {
+    max-width: 34rem;
+    margin-top: 1.75rem;
+    font-size: var(--step-1);
+    line-height: 1.6;
+    color: var(--on-dark-soft);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 2.5rem;
+  }
+
+  .hero__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 0;
+    margin-top: clamp(2.25rem, 1.5rem + 2.5vw, 3.5rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(251 248 242 / 0.2);
+    max-width: 46rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--on-dark-soft);
+  }
+
+  .hero__facts li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding-right: 1.4rem;
+    margin-right: 1.4rem;
+    border-right: 1px solid rgb(251 248 242 / 0.2);
+  }
+
+  .hero__facts li:last-child {
+    margin-right: 0;
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  .hero__facts :global(.icon) {
+    color: var(--gold-light);
+  }
+
+  .hero__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--on-dark);
+  }
+
+  .hero__rating strong {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .hero__rating :global(.hero__star) {
+    fill: var(--gold);
+    stroke: var(--gold);
+  }
+
+  @media (max-width: 640px) {
+    .hero__actions .btn {
+      flex: 1 1 100%;
+    }
+
+    .hero__facts {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .hero__facts li {
+      margin-right: 0;
+      padding-right: 0;
+      border-right: 0;
+    }
+
+    .hero__shade {
+      background: linear-gradient(180deg, rgb(20 33 25 / 0.55), rgb(20 33 25 / 0.35) 45%, rgb(20 33 25 / 0.75));
+    }
+  }
+</style>
+
+<script>
+  // Paralaxe discreta das camadas da ilustração (ou da foto) ao rolar.
+  const media = document.querySelector<HTMLElement>('[data-parallax]');
+  const motionOk = window.matchMedia('(prefers-reduced-motion: no-preference)');
+
+  if (media && motionOk.matches) {
+    const layers = [...media.querySelectorAll<SVGGElement>('[data-depth]')];
+    const photo = media.querySelector<HTMLElement>('picture, .hero__photo');
+    let ticking = false;
+
+    const render = () => {
+      const y = Math.min(window.scrollY, window.innerHeight * 1.2);
+      layers.forEach((layer) => {
+        layer.style.transform = `translate3d(0, ${y * Number(layer.dataset.depth)}px, 0)`;
+      });
+      if (photo) photo.style.transform = `translate3d(0, ${y * 0.18}px, 0) scale(1.06)`;
+      ticking = false;
+    };
+
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!ticking && window.scrollY < window.innerHeight * 1.3) {
+          ticking = true;
+          requestAnimationFrame(render);
+        }
+      },
+      { passive: true },
+    );
+    render();
+  }
+</script>

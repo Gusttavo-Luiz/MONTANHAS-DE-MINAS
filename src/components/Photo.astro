@@ -1,0 +1,200 @@
+---
+/**
+ * Foto oficial de src/assets/fotos. Sem o arquivo, mostra uma ilustração
+ * elegante e facilmente substituível. Em `npm run dev` a moldura indica
+ * também o nome do arquivo esperado.
+ */
+import { Picture, getImage } from 'astro:assets';
+import { getPhoto } from '../lib/photos';
+import { devHints } from '../config/flags';
+import { art, type ArtName } from './art';
+
+interface Props {
+  file: string;
+  alt: string;
+  art: ArtName;
+  /** Legenda da moldura; `false` mostra só a ilustração. */
+  label?: string | false;
+  /** Mostra "Fotografia oficial em breve" na moldura. */
+  hint?: boolean;
+  widths?: number[];
+  sizes?: string;
+  priority?: boolean;
+  class?: string;
+  /** Gera `data-full` com a versão grande (usada pelo visualizador). */
+  zoomable?: boolean;
+  tone?: 'cream' | 'green' | 'terracotta' | 'wood' | 'gold';
+}
+
+const {
+  file,
+  alt,
+  art: artName,
+  label,
+  hint = true,
+  widths = [480, 800, 1200],
+  sizes = '(min-width: 1024px) 40vw, 100vw',
+  priority = false,
+  class: className,
+  zoomable = false,
+  tone = 'cream',
+} = Astro.props;
+
+const image = getPhoto(file);
+const usable = image ? widths.filter((w) => w <= image.width) : [];
+if (image && usable.length === 0) usable.push(image.width);
+const full = image && zoomable ? await getImage({ src: image, width: Math.min(image.width, 2000), format: 'webp' }) : null;
+const caption = label === false ? undefined : (label ?? alt);
+---
+
+{
+  image ? (
+    <Picture
+      src={image}
+      alt={alt}
+      widths={usable}
+      sizes={sizes}
+      formats={['avif', 'webp']}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding={priority ? 'sync' : 'async'}
+      fetchpriority={priority ? 'high' : undefined}
+      class:list={['photo', className]}
+      data-full={full?.src}
+    />
+  ) : (
+    <div
+      class:list={['photo-placeholder', `photo-placeholder--${tone}`, className]}
+      role="img"
+      aria-label={`Ilustração: ${alt}${hint ? ' (fotografia oficial em breve)' : ''}`}
+    >
+      <span class="photo-placeholder__tile tile-pattern" aria-hidden="true" />
+      <svg
+        class="photo-placeholder__art"
+        viewBox="0 0 120 120"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        focusable="false"
+        set:html={art[artName]}
+      />
+      {caption && <span class="photo-placeholder__label">{caption}</span>}
+      {hint && <span class="photo-placeholder__hint">Fotografia oficial em breve</span>}
+      {devHints && <code class="photo-placeholder__file">{file}</code>}
+    </div>
+  )
+}
+
+<style>
+  .photo-placeholder {
+    --ph-bg: var(--sand);
+    --ph-art: var(--terracotta);
+    --ph-text: var(--green);
+    --ph-soft: var(--ink-soft);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    height: 100%;
+    min-height: 180px;
+    padding: 1.25rem;
+    overflow: hidden;
+    text-align: center;
+    color: var(--ph-text);
+    background:
+      radial-gradient(110% 80% at 50% 10%, rgb(255 255 255 / 0.28), transparent 65%),
+      var(--ph-bg);
+  }
+
+  .photo-placeholder--green {
+    --ph-bg: var(--green);
+    --ph-art: var(--gold-light);
+    --ph-text: var(--on-dark);
+    --ph-soft: var(--on-dark-soft);
+  }
+
+  .photo-placeholder--terracotta {
+    --ph-bg: var(--terracotta);
+    --ph-art: var(--cream);
+    --ph-text: var(--on-dark);
+    --ph-soft: var(--on-dark-soft);
+  }
+
+  .photo-placeholder--wood {
+    --ph-bg: var(--wood);
+    --ph-art: var(--gold-light);
+    --ph-text: var(--on-dark);
+    --ph-soft: var(--on-dark-soft);
+  }
+
+  .photo-placeholder--gold {
+    --ph-bg: #d9bf88;
+    --ph-art: var(--wood);
+    --ph-text: var(--wood-deep);
+    --ph-soft: var(--wood);
+  }
+
+  .photo-placeholder--green,
+  .photo-placeholder--terracotta,
+  .photo-placeholder--wood {
+    background:
+      radial-gradient(110% 80% at 50% 10%, rgb(255 255 255 / 0.1), transparent 65%),
+      var(--ph-bg);
+  }
+
+  .photo-placeholder__tile {
+    position: absolute;
+    inset: 0;
+    opacity: 0.07;
+    filter: invert(var(--tile-invert, 0));
+  }
+
+  .photo-placeholder--green .photo-placeholder__tile,
+  .photo-placeholder--terracotta .photo-placeholder__tile,
+  .photo-placeholder--wood .photo-placeholder__tile {
+    --tile-invert: 1;
+    opacity: 0.09;
+  }
+
+  .photo-placeholder__art {
+    position: relative;
+    width: clamp(64px, 34%, 150px);
+    height: auto;
+    color: var(--ph-art);
+    transition: transform 1.2s var(--ease-out);
+  }
+
+  .photo-placeholder__label {
+    position: relative;
+    margin-top: 0.4rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 1rem + 0.5vw, 1.45rem);
+    font-style: italic;
+    font-weight: 380;
+    line-height: 1.2;
+  }
+
+  .photo-placeholder__hint {
+    position: relative;
+    font-size: 0.6875rem;
+    font-weight: 650;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ph-soft);
+  }
+
+  .photo-placeholder__file {
+    position: relative;
+    margin-top: 0.35rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background: rgb(251 248 242 / 0.85);
+    font-size: 0.6875rem;
+    color: var(--terracotta-deep);
+  }
+</style>

@@ -1,0 +1,275 @@
+---
+import Icon from './Icon.astro';
+import { reviewHighlights, testimonials } from '../content/reviews';
+import { site, reviewsLink, formatRating } from '../config/site';
+
+const rating = site.googleRating;
+const ratingText = formatRating(rating);
+// Preenchimento de cada estrela (0 a 1) para a nota informada.
+const stars = Array.from({ length: 5 }, (_, i) => Math.max(0, Math.min(1, rating - i)));
+const monthYear = (iso: string) => {
+  const [y, m] = iso.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+};
+---
+
+<section class="reviews section on-dark" id="avaliacoes" aria-labelledby="reviews-title">
+  <span class="reviews__pattern tile-pattern" aria-hidden="true"></span>
+  <div class="container reviews__grid">
+    <div class="reviews__intro">
+      <p class="eyebrow" data-reveal>Experiência e avaliações</p>
+      <h2 class="display reviews__title" id="reviews-title" data-reveal style="--reveal-delay:100">
+        Quem conhece, <em>recomenda.</em>
+      </h2>
+
+      <div class="score" data-reveal style="--reveal-delay:180">
+        <p class="score__value">{ratingText}</p>
+        <div class="score__meta">
+          <p class="score__stars" role="img" aria-label={`Nota ${ratingText} de 5 no Google`}>
+            {
+              stars.map((fill) => (
+                <span class="score__star" style={`--fill:${fill * 100}%`} aria-hidden="true">
+                  ★
+                </span>
+              ))
+            }
+          </p>
+          <p class="score__label">Nota no Google</p>
+        </div>
+      </div>
+      <p class="reviews__lead" data-reveal style="--reveal-delay:240">
+        A nota de quem já sentou à nossa mesa é a melhor referência para quem ainda vai conhecer. Veja o que os
+        visitantes destacam e leia as avaliações completas no Google.
+      </p>
+      <a class="btn btn--gold reviews__cta" href={reviewsLink} target="_blank" rel="noopener" data-reveal style="--reveal-delay:300">
+        Ver avaliações no Google <Icon name="external" /><span class="sr-only"> (abre em nova aba)</span>
+      </a>
+    </div>
+
+    <div class="reviews__content">
+      <h3 class="reviews__subtitle" data-reveal>O que mais se destaca</h3>
+      <ul class="highlights">
+        {
+          reviewHighlights.map((item, i) => (
+            <li class="highlight" data-reveal style={`--reveal-delay:${i * 80}`}>
+              <span class="highlight__icon">
+                <Icon name={item.icon} size={22} />
+              </span>
+              <h4 class="highlight__title">{item.title}</h4>
+              <p class="highlight__text">{item.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        testimonials.length > 0 && (
+          <ul class="testimonials">
+            {testimonials.map((t) => (
+              <li data-reveal>
+                <figure class="testimonial">
+                  <Icon name="quote" size={28} class="testimonial__quote" />
+                  <blockquote cite={t.url}>
+                    <p>{t.text}</p>
+                  </blockquote>
+                  <figcaption>
+                    <strong>{t.author}</strong>
+                    <span>
+                      <a href={t.url} target="_blank" rel="noopener">
+                        Avaliação no {t.source}
+                        <span class="sr-only"> (abre em nova aba)</span>
+                      </a>
+                      {t.date && <> · {monthYear(t.date)}</>}
+                    </span>
+                  </figcaption>
+                </figure>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .reviews {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--green);
+    color: var(--on-dark);
+  }
+
+  .reviews__pattern {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.05;
+    filter: invert(1);
+    mask-image: linear-gradient(90deg, transparent 30%, #000);
+  }
+
+  .reviews__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(3rem, 2rem + 5vw, 7rem);
+    align-items: start;
+  }
+
+  .reviews__title {
+    margin-top: 1.1rem;
+  }
+
+  .reviews__title em {
+    color: var(--gold-light);
+  }
+
+  .score {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 2.25rem;
+  }
+
+  .score__value {
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 3rem + 4vw, 6rem);
+    font-weight: 380;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--gold-light);
+  }
+
+  .score__stars {
+    display: flex;
+    gap: 0.2rem;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .score__star {
+    background: linear-gradient(90deg, var(--gold) var(--fill), rgb(251 248 242 / 0.25) var(--fill));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .score__label {
+    margin-top: 0.45rem;
+    font-size: 0.8125rem;
+    font-weight: 650;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--on-dark-soft);
+  }
+
+  .reviews__lead {
+    max-width: 30rem;
+    margin-top: 1.75rem;
+    color: var(--on-dark-soft);
+  }
+
+  .reviews__cta {
+    margin-top: 2rem;
+  }
+
+  .reviews__subtitle {
+    font-size: var(--step-2);
+    color: var(--on-dark);
+  }
+
+  .highlights {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .highlight {
+    padding: 1.5rem;
+    border: 1px solid rgb(251 248 242 / 0.14);
+    border-radius: var(--radius-lg);
+    background: rgb(251 248 242 / 0.04);
+    transition:
+      background-color 0.4s var(--ease),
+      border-color 0.4s var(--ease),
+      transform 0.4s var(--ease);
+  }
+
+  .highlight:hover {
+    background: rgb(251 248 242 / 0.08);
+    border-color: rgb(198 161 91 / 0.5);
+    transform: translateY(-3px);
+  }
+
+  .highlight__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: rgb(198 161 91 / 0.16);
+    color: var(--gold-light);
+  }
+
+  .highlight__title {
+    margin-top: 1.1rem;
+    font-size: 1.25rem;
+  }
+
+  .highlight__text {
+    margin-top: 0.4rem;
+    font-size: 0.9375rem;
+    color: var(--on-dark-soft);
+  }
+
+  .testimonials {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .testimonial {
+    margin: 0;
+    padding: 1.75rem;
+    border-radius: var(--radius-lg);
+    background: var(--cream-light);
+    color: var(--ink);
+  }
+
+  .testimonial :global(.testimonial__quote) {
+    color: var(--terracotta);
+  }
+
+  .testimonial blockquote {
+    margin: 0.75rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    line-height: 1.5;
+  }
+
+  .testimonial figcaption {
+    display: grid;
+    gap: 0.15rem;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--ink-soft);
+  }
+
+  .testimonial figcaption strong {
+    color: var(--green);
+  }
+
+  @media (max-width: 960px) {
+    .reviews__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .highlights {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

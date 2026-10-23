@@ -1,0 +1,263 @@
+---
+import Icon from './Icon.astro';
+import SectionHeading from './SectionHeading.astro';
+import { site, mapLinks, phoneLink } from '../config/site';
+---
+
+<section class="location section" id="localizacao" aria-labelledby="location-title">
+  <div class="container">
+    <SectionHeading eyebrow="Localização" id="location-title" align="split">
+      Um refúgio de sabores <em>pertinho da natureza.</em>
+      <Fragment slot="lead">
+        O restaurante fica na zona rural de Itaúna, no povoado de Campos — um caminho que já anuncia a tranquilidade
+        do interior mineiro.
+      </Fragment>
+    </SectionHeading>
+
+    <div class="location__grid">
+      <div class="location__info">
+        <address class="location__card" data-reveal>
+          <p class="location__name">{site.name}</p>
+          <p class="location__line">
+            <Icon name="pin" size={20} />
+            <span>
+              {site.address.area}
+              <br />
+              {site.address.city} — {site.address.stateName}
+            </span>
+          </p>
+          <p class="location__line">
+            <Icon name="phone" size={20} />
+            <a href={phoneLink}>{site.contact.phoneDisplay}</a>
+          </p>
+        </address>
+
+        <p class="location__text" data-reveal style="--reveal-delay:80">
+          Por estar em uma região rural, recomendamos traçar a rota pelo Google Maps antes de sair. Se tiver qualquer
+          dúvida sobre o caminho, fale com a equipe — teremos prazer em ajudar.
+        </p>
+
+        <div class="location__actions" data-reveal style="--reveal-delay:140">
+          <a class="btn btn--terracotta" href={mapLinks.directions} target="_blank" rel="noopener">
+            <Icon name="route" /> Traçar rota no Google Maps<span class="sr-only"> (abre em nova aba)</span>
+          </a>
+          <a class="btn btn--ghost" href={phoneLink}>
+            <Icon name="phone" /> Ligar
+          </a>
+        </div>
+      </div>
+
+      <div class="map" data-map data-reveal>
+        <div class="map__facade" data-map-facade>
+          <svg class="map__art" viewBox="0 0 600 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+            <g fill="none" stroke="currentColor" stroke-width="1" opacity=".3">
+              <path d="M-20 460c80-40 120-120 210-130s140 60 230 30 120-110 210-120"></path>
+              <path d="M-20 410c90-30 130-110 220-120s150 50 240 20 120-100 190-110"></path>
+              <path d="M-20 360c100-20 140-100 230-110s160 40 250 10 110-90 170-100"></path>
+              <path d="M-20 300c110-10 150-90 240-100s170 30 260 0 100-80 150-90"></path>
+              <path d="M-20 240c120 0 160-80 250-90s180 20 270-10 90-70 130-80"></path>
+              <path d="M-20 520c70-50 110-130 200-140s130 70 220 40 130-120 230-130"></path>
+            </g>
+            <path d="M30 520C110 420 200 390 300 250S470 90 560 -10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="2 9" stroke-linecap="round" opacity=".55"></path>
+          </svg>
+          <span class="map__pin" aria-hidden="true"><Icon name="utensils" size={22} /></span>
+          <div class="map__panel">
+            <p class="map__title">Mapa interativo</p>
+            <p class="map__text">O mapa do Google é carregado somente quando você solicitar.</p>
+            <div class="map__buttons">
+              <button class="btn btn--sm" type="button" data-map-load>
+                <Icon name="pin" /> Carregar mapa
+              </button>
+              <a class="btn btn--sm btn--ghost" href={mapLinks.view} target="_blank" rel="noopener">
+                Abrir no Google Maps<span class="sr-only"> (abre em nova aba)</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <template data-map-template>
+          <iframe
+            title="Mapa com a localização do Restaurante Montanhas de Minas, em Itaúna"
+            src={mapLinks.embed}
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen></iframe>
+        </template>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .location :global(.section-title em) {
+    color: var(--terracotta);
+  }
+
+  .location__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(2.5rem, 1.5rem + 4vw, 6rem);
+    align-items: center;
+  }
+
+  .location__card {
+    display: grid;
+    gap: 0.9rem;
+    padding: clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
+    border-radius: var(--radius-lg);
+    background: var(--cream);
+    font-style: normal;
+  }
+
+  .location__name {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    color: var(--green);
+  }
+
+  .location__line {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .location__line :global(.icon) {
+    flex: none;
+    margin-top: 0.2rem;
+    color: var(--terracotta);
+  }
+
+  .location__line a {
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .location__line a:hover {
+    text-decoration: underline;
+  }
+
+  .location__text {
+    margin-top: 1.75rem;
+    color: var(--ink-soft);
+  }
+
+  .location__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .map {
+    position: relative;
+    aspect-ratio: 6 / 5;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--green);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .map :global(iframe) {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .map__facade {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: end start;
+    padding: clamp(1rem, 3vw, 2rem);
+    color: var(--gold-light);
+  }
+
+  .map__art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .map__pin {
+    position: absolute;
+    top: 38%;
+    left: 52%;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: var(--terracotta);
+    color: var(--on-dark);
+    transform: translate(-50%, -50%);
+    box-shadow:
+      0 0 0 10px rgb(166 83 54 / 0.25),
+      0 0 0 22px rgb(166 83 54 / 0.1);
+  }
+
+  .map__panel {
+    position: relative;
+    display: grid;
+    gap: 0.5rem;
+    max-width: 24rem;
+    padding: 1.4rem 1.5rem;
+    border-radius: var(--radius);
+    background: var(--cream-light);
+    color: var(--ink);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .map__title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--green);
+  }
+
+  .map__text {
+    font-size: 0.875rem;
+    color: var(--ink-soft);
+  }
+
+  .map__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  @media (max-width: 960px) {
+    .location__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .map {
+      aspect-ratio: 4 / 5;
+      max-height: 560px;
+    }
+
+    .map__pin {
+      top: 28%;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .location__actions .btn {
+      flex: 1 1 100%;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-map]').forEach((map) => {
+    const button = map.querySelector<HTMLButtonElement>('[data-map-load]');
+    const template = map.querySelector<HTMLTemplateElement>('[data-map-template]');
+    const facade = map.querySelector<HTMLElement>('[data-map-facade]');
+    button?.addEventListener('click', () => {
+      if (!template || !facade) return;
+      const iframe = template.content.firstElementChild!.cloneNode(true) as HTMLIFrameElement;
+      facade.replaceWith(iframe);
+      iframe.focus();
+    });
+  });
+</script>

@@ -1,0 +1,273 @@
+---
+/**
+ * Visualizador de fotos. Agrupa os elementos `[data-lightbox-item="grupo"]`;
+ * `[data-lightbox-open="grupo"]` abre o grupo na primeira foto.
+ * Teclado (← → Esc), gestos de deslizar e foco preso no diálogo nativo.
+ */
+import Icon from './Icon.astro';
+---
+
+<dialog class="lightbox" data-lightbox aria-label="Visualizador de fotos">
+  <div class="lightbox__top">
+    <p class="lightbox__counter" data-lb-counter aria-live="polite"></p>
+    <button class="lightbox__btn" type="button" data-lb-close aria-label="Fechar visualizador">
+      <Icon name="close" />
+    </button>
+  </div>
+  <figure class="lightbox__figure">
+    <div class="lightbox__stage" data-lb-stage></div>
+    <figcaption class="lightbox__caption" data-lb-caption></figcaption>
+  </figure>
+  <button class="lightbox__btn lightbox__nav lightbox__nav--prev" type="button" data-lb-prev aria-label="Foto anterior">
+    <Icon name="chevronLeft" />
+  </button>
+  <button class="lightbox__btn lightbox__nav lightbox__nav--next" type="button" data-lb-next aria-label="Próxima foto">
+    <Icon name="chevronRight" />
+  </button>
+</dialog>
+
+<style>
+  .lightbox {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(16 26 20 / 0.96);
+    color: var(--cream-light);
+    overscroll-behavior: contain;
+  }
+
+  .lightbox[open] {
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  .lightbox::backdrop {
+    background: rgb(16 26 20 / 0.7);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lightbox[open] {
+      animation: lb-in 0.35s var(--ease-out);
+    }
+  }
+
+  .lightbox__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem var(--gutter);
+  }
+
+  .lightbox__counter {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--on-dark-soft);
+  }
+
+  .lightbox__figure {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0 clamp(0.75rem, 6vw, 6rem) 1.25rem;
+  }
+
+  .lightbox__stage {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    touch-action: pan-y;
+  }
+
+  .lightbox__stage > :global(*) {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: var(--radius-sm);
+  }
+
+  .lightbox__stage :global(img) {
+    width: auto;
+    height: auto;
+    max-height: calc(100svh - 9rem);
+    object-fit: contain;
+  }
+
+  .lightbox__stage :global(.photo-placeholder) {
+    width: min(960px, 100%);
+    height: auto;
+    aspect-ratio: 3 / 2;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lightbox__stage > :global(*) {
+      animation: lb-photo 0.45s var(--ease-out);
+    }
+  }
+
+  .lightbox__caption {
+    padding-top: 1rem;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-style: italic;
+    text-align: center;
+  }
+
+  .lightbox__btn {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid rgb(251 248 242 / 0.25);
+    border-radius: 50%;
+    background: rgb(251 248 242 / 0.06);
+    color: inherit;
+    transition: background-color 0.3s var(--ease);
+  }
+
+  .lightbox__btn:hover {
+    background: rgb(251 248 242 / 0.16);
+  }
+
+  .lightbox__btn:focus-visible {
+    outline-color: var(--gold-light);
+  }
+
+  .lightbox__nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lightbox__nav--prev {
+    left: clamp(0.5rem, 2vw, 2rem);
+  }
+
+  .lightbox__nav--next {
+    right: clamp(0.5rem, 2vw, 2rem);
+  }
+
+  .lightbox__nav[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .lightbox__nav {
+      top: auto;
+      bottom: max(1rem, env(safe-area-inset-bottom));
+      transform: none;
+    }
+
+    .lightbox__figure {
+      padding-bottom: 5rem;
+    }
+  }
+
+  @keyframes lb-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes lb-photo {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+
+  if (dialog) {
+    const stage = dialog.querySelector<HTMLElement>('[data-lb-stage]')!;
+    const caption = dialog.querySelector<HTMLElement>('[data-lb-caption]')!;
+    const counter = dialog.querySelector<HTMLElement>('[data-lb-counter]')!;
+    const prev = dialog.querySelector<HTMLButtonElement>('[data-lb-prev]')!;
+    const next = dialog.querySelector<HTMLButtonElement>('[data-lb-next]')!;
+
+    let items: HTMLElement[] = [];
+    let index = 0;
+    let opener: HTMLElement | null = null;
+
+    const groupItems = (group: string) =>
+      [...document.querySelectorAll<HTMLElement>('[data-lightbox-item]')].filter(
+        (el) => el.dataset.lightboxItem === group,
+      );
+
+    const render = () => {
+      const item = items[index];
+      const img = item.querySelector('img');
+      stage.replaceChildren();
+      if (img) {
+        const big = new Image();
+        big.src = img.dataset.full || img.currentSrc || img.src;
+        big.alt = img.alt;
+        big.decoding = 'async';
+        stage.append(big);
+      } else {
+        const placeholder = item.querySelector('.photo-placeholder');
+        if (placeholder) stage.append(placeholder.cloneNode(true));
+      }
+      caption.textContent = item.dataset.caption ?? '';
+      counter.textContent = `${index + 1} / ${items.length}`;
+      prev.hidden = next.hidden = items.length < 2;
+    };
+
+    const open = (group: string, start: HTMLElement | number, trigger: HTMLElement) => {
+      items = groupItems(group);
+      if (!items.length) return;
+      index = typeof start === 'number' ? start : Math.max(0, items.indexOf(start));
+      opener = trigger;
+      render();
+      dialog.showModal();
+      document.documentElement.style.overflow = 'hidden';
+    };
+
+    const go = (step: number) => {
+      index = (index + step + items.length) % items.length;
+      render();
+    };
+
+    document.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      const item = target.closest<HTMLElement>('[data-lightbox-item]');
+      if (item) return open(item.dataset.lightboxItem!, item, item);
+      const groupBtn = target.closest<HTMLElement>('[data-lightbox-open]');
+      if (groupBtn) open(groupBtn.dataset.lightboxOpen!, 0, groupBtn);
+    });
+
+    prev.addEventListener('click', () => go(-1));
+    next.addEventListener('click', () => go(1));
+    dialog.querySelector('[data-lb-close]')!.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', () => {
+      document.documentElement.style.overflow = '';
+      stage.replaceChildren();
+      opener?.focus({ preventScroll: true });
+    });
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog || event.target === stage) dialog.close();
+    });
+    dialog.addEventListener('keydown', (event) => {
+      if (items.length < 2) return;
+      if (event.key === 'ArrowLeft') go(-1);
+      if (event.key === 'ArrowRight') go(1);
+    });
+
+    let startX = 0;
+    stage.addEventListener('touchstart', (event) => (startX = event.touches[0].clientX), { passive: true });
+    stage.addEventListener(
+      'touchend',
+      (event) => {
+        const delta = event.changedTouches[0].clientX - startX;
+        if (Math.abs(delta) > 50 && items.length > 1) go(delta < 0 ? 1 : -1);
+      },
+      { passive: true },
+    );
+  }
+</script>

@@ -1,0 +1,28 @@
+{
+  "name": "restaurante-montanhas-de-minas",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Site oficial do Restaurante Montanhas de Minas — culinária mineira na zona rural de Itaúna/MG",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "check": "astro check",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "test": "astro build && playwright test"
+  },
+  "dependencies": {
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "astro": "^7.3.8"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@playwright/test": "1.56.1",
+    "@types/node": "^22.20.5",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Essence from '../components/Essence.astro';
+import Menu from '../components/Menu.astro';
+import Ambience from '../components/Ambience.astro';
+import Reviews from '../components/Reviews.astro';
+import Moments from '../components/Moments.astro';
+import Hours from '../components/Hours.astro';
+import Location from '../components/Location.astro';
+import Contact from '../components/Contact.astro';
+import Lightbox from '../components/Lightbox.astro';
+import MobileCTA from '../components/MobileCTA.astro';
+---
+
+<BaseLayout
+  title="Restaurante Montanhas de Minas | Culinária Mineira em Itaúna"
+  description="Conheça o Restaurante Montanhas de Minas, em Itaúna, MG. Descubra sabores da culinária mineira e brasileira, conheça nosso ambiente e planeje sua visita."
+  home
+>
+  <Hero />
+  <Essence />
+  <Menu />
+  <Ambience />
+  <Reviews />
+  <Moments />
+  <Hours />
+  <Location />
+  <Contact />
+  <Fragment slot="after">
+    <Lightbox />
+    <MobileCTA />
+  </Fragment>
+</BaseLayout>

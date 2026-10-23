@@ -1,0 +1,266 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { navigation } from '../content/navigation';
+import { openingHours } from '../content/hours';
+import { formatRange } from '../lib/hours';
+import { site, mapLinks, placeLine, phoneLink, whatsappLink } from '../config/site';
+import { withBase } from '../lib/url';
+
+interface Props {
+  /** Links apontam para a página inicial (páginas internas). */
+  external?: boolean;
+}
+
+const { external = false } = Astro.props;
+const home = withBase('/');
+const href = (anchor: string) => (external ? `${home}${anchor}` : anchor);
+const year = new Date().getFullYear();
+const socials = [
+  { label: 'Instagram', url: site.social.instagram, icon: 'instagram' as const },
+  { label: 'Facebook', url: site.social.facebook, icon: 'facebook' as const },
+].filter((s) => s.url);
+---
+
+<footer class="site-footer on-dark">
+  <span class="site-footer__ridge" aria-hidden="true"></span>
+  <div class="container site-footer__grid">
+    <div class="site-footer__brand">
+      <a href={href('#inicio')} class="site-footer__logo" aria-label={`${site.name} — início`}>
+        <Logo tone="light" size="lg" />
+      </a>
+      <p class="site-footer__phrase">{site.footerPhrase}</p>
+      {
+        socials.length > 0 && (
+          <ul class="site-footer__social">
+            {socials.map((s) => (
+              <li>
+                <a href={s.url} target="_blank" rel="noopener" aria-label={`${s.label} (abre em nova aba)`}>
+                  <Icon name={s.icon} size={20} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+
+    <nav class="site-footer__col" aria-label="Rodapé">
+      <h2 class="site-footer__heading">Navegue</h2>
+      <ul class="site-footer__links">
+        {
+          navigation.map((item) => (
+            <li>
+              <a href={href(item.href)}>{item.label}</a>
+            </li>
+          ))
+        }
+        <li><a href={href('#horarios')}>Horários</a></li>
+        <li><a href={href('#contato')}>Contato</a></li>
+      </ul>
+    </nav>
+
+    <div class="site-footer__col">
+      <h2 class="site-footer__heading">Contato</h2>
+      <ul class="site-footer__contact">
+        <li>
+          <Icon name="phone" size={18} />
+          <a href={phoneLink}>{site.contact.phoneDisplay}</a>
+        </li>
+        <li>
+          <Icon name="whatsapp" size={18} />
+          <a href={whatsappLink()} target="_blank" rel="noopener">
+            WhatsApp<span class="sr-only"> (abre em nova aba)</span>
+          </a>
+        </li>
+        <li>
+          <Icon name="pin" size={18} />
+          <a href={mapLinks.directions} target="_blank" rel="noopener">
+            {placeLine}<span class="sr-only"> (rota no Google Maps, abre em nova aba)</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="site-footer__col">
+      <h2 class="site-footer__heading">Horários</h2>
+      <dl class="site-footer__hours">
+        {
+          openingHours.map((day) => (
+            <div>
+              <dt>{day.short}</dt>
+              <dd>{formatRange(day)}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+
+  <div class="container site-footer__bottom">
+    <p>{site.tagline}</p>
+    <p>© <span data-year>{year}</span> {site.name}. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('[data-year]').forEach((el) => (el.textContent = String(new Date().getFullYear())));
+</script>
+
+<style>
+  .site-footer {
+    position: relative;
+    padding-top: clamp(4rem, 3rem + 4vw, 6rem);
+    background: var(--wood-deep);
+    color: var(--on-dark-soft);
+    font-size: 0.9375rem;
+  }
+
+  .site-footer__ridge {
+    position: absolute;
+    inset: -1px 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--terracotta), var(--gold), var(--green));
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: 1.4fr 0.8fr 1fr 1fr;
+    gap: clamp(2rem, 1.5rem + 3vw, 4rem);
+  }
+
+  .site-footer__logo {
+    display: inline-block;
+    color: var(--on-dark);
+    text-decoration: none;
+    border-radius: 4px;
+  }
+
+  .site-footer__phrase {
+    max-width: 22rem;
+    margin-top: 1.25rem;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-style: italic;
+    line-height: 1.45;
+    color: var(--on-dark);
+  }
+
+  .site-footer__social {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+
+  .site-footer__social a {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgb(251 248 242 / 0.2);
+    border-radius: 50%;
+    transition: background-color 0.3s var(--ease);
+  }
+
+  .site-footer__social a:hover {
+    background: rgb(251 248 242 / 0.1);
+  }
+
+  .site-footer__heading {
+    margin-bottom: 1.1rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+  }
+
+  .site-footer__links {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .site-footer a {
+    text-decoration: none;
+    transition: color 0.3s var(--ease);
+  }
+
+  .site-footer__links a,
+  .site-footer__contact a {
+    display: inline-block;
+    padding-block: 0.3rem;
+  }
+
+  .site-footer a:hover {
+    color: var(--on-dark);
+    text-decoration: underline;
+  }
+
+  .site-footer__contact {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .site-footer__contact li {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+  }
+
+  .site-footer__contact :global(.icon) {
+    flex: none;
+    margin-top: 0.5rem;
+    color: var(--gold);
+  }
+
+  .site-footer__hours {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+  }
+
+  .site-footer__hours div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgb(251 248 242 / 0.08);
+  }
+
+  .site-footer__hours dt {
+    font-weight: 600;
+    color: var(--on-dark);
+  }
+
+  .site-footer__hours dd {
+    margin: 0;
+  }
+
+  .site-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    margin-top: clamp(3rem, 2rem + 3vw, 4.5rem);
+    padding-block: 1.75rem;
+    border-top: 1px solid rgb(251 248 242 / 0.12);
+    font-size: 0.8125rem;
+  }
+
+  .site-footer__bottom p:first-child {
+    color: var(--on-dark);
+  }
+
+  @media (max-width: 1000px) {
+    .site-footer__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .site-footer__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

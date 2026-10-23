@@ -1,0 +1,71 @@
+---
+interface Props {
+  eyebrow: string;
+  id: string;
+  align?: 'left' | 'center' | 'split';
+}
+
+const { eyebrow, id, align = 'left' } = Astro.props;
+---
+
+<header class:list={['section-heading', `section-heading--${align}`]}>
+  <div class="section-heading__main">
+    <p class="eyebrow" data-reveal>{eyebrow}</p>
+    <h2 class="display section-title" id={id} data-reveal style="--reveal-delay:100">
+      <slot />
+    </h2>
+  </div>
+  {
+    Astro.slots.has('lead') && (
+      <p class="lead section-heading__lead" data-reveal style="--reveal-delay:180">
+        <slot name="lead" />
+      </p>
+    )
+  }
+</header>
+
+<style>
+  .section-heading {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  }
+
+  .section-title {
+    margin-top: 1.1rem;
+    max-width: 17ch;
+  }
+
+  .section-heading__lead {
+    max-width: 34rem;
+  }
+
+  .section-heading--center {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .section-heading--center .section-title {
+    margin-inline: auto;
+  }
+
+  .section-heading--split {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: end;
+    column-gap: 4rem;
+  }
+
+  .section-heading--split .section-heading__lead {
+    justify-self: end;
+  }
+
+  @media (max-width: 860px) {
+    .section-heading--split {
+      grid-template-columns: 1fr;
+    }
+
+    .section-heading--split .section-heading__lead {
+      justify-self: start;
+    }
+  }
+</style>
