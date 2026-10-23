@@ -1,0 +1,137 @@
+---
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/fraunces/opsz-italic.css';
+import '@fontsource-variable/figtree/wght.css';
+import '../styles/global.css';
+import frauncesLatin from '@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2?url';
+import figtreeLatin from '@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site, mapLinks } from '../config/site';
+import { openingHours } from '../content/hours';
+import { demoMode } from '../config/flags';
+import { withBase } from '../lib/url';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Página inicial: cabeçalho transparente sobre a primeira dobra. */
+  home?: boolean;
+  noindex?: boolean;
+}
+
+const { title, description, home = false, noindex = false } = Astro.props;
+const origin = Astro.site;
+const canonical = origin ? new URL(Astro.url.pathname, origin).href : undefined;
+const ogImage = origin ? new URL(withBase('/og-image.jpg'), origin).href : withBase('/og-image.jpg');
+
+const schemaDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/**
+ * Dados estruturados apenas com informações fornecidas pelo restaurante
+ * (sem nota autodeclarada, endereço inventado ou coordenadas).
+ */
+const restaurant = {
+  '@context': 'https://schema.org',
+  '@type': 'Restaurant',
+  name: site.name,
+  description: 'Restaurante de culinária mineira e brasileira na zona rural de Itaúna, Minas Gerais.',
+  ...(origin && { url: new URL(withBase('/'), origin).href, '@id': `${new URL(withBase('/'), origin).href}#restaurante` }),
+  image: ogImage,
+  telephone: site.contact.phone,
+  servesCuisine: ['Mineira', 'Brasileira'],
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: site.address.area,
+    addressLocality: site.address.city,
+    addressRegion: site.address.state,
+    addressCountry: site.address.country,
+  },
+  hasMap: mapLinks.directions,
+  ...(site.menuUrl && { hasMenu: site.menuUrl }),
+  openingHoursSpecification: openingHours
+    .filter((day) => day.open && day.close)
+    .map((day) => ({
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: schemaDays[day.weekday],
+      opens: day.open,
+      closes: day.close === '00:00' ? '23:59' : day.close,
+    })),
+  sameAs: [site.social.instagram, site.social.facebook].filter(Boolean),
+};
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta name="robots" content={noindex || demoMode ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
+    <meta name="theme-color" content="#243b2d" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="geo.region" content="BR-MG" />
+    <meta name="geo.placename" content="Itaúna" />
+
+    <link rel="preload" href={frauncesLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={figtreeLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={withBase('/favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+    <link rel="manifest" href={withBase('/site.webmanifest')} />
+    {origin && <link rel="sitemap" href={withBase('/sitemap.xml')} />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Restaurante Montanhas de Minas — culinária mineira em Itaúna, MG" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script is:inline>document.documentElement.classList.add('js')</script>
+    {home && <script type="application/ld+json" set:html={JSON.stringify(restaurant)} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <Header solid={!home} />
+    <main id="conteudo" tabindex="-1">
+      <slot />
+    </main>
+    <Footer external={!home} />
+    <slot name="after" />
+
+    <script>
+      const blocks = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) =>
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              io.unobserve(entry.target);
+            }),
+          { rootMargin: '0px 0px -8% 0px' },
+        );
+        blocks.forEach((block) => io.observe(block));
+      } else {
+        blocks.forEach((block) => block.classList.add('is-visible'));
+      }
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  main:focus {
+    outline: none;
+  }
+</style>

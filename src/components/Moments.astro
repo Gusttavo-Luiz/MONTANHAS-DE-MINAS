@@ -1,0 +1,408 @@
+---
+import Icon from './Icon.astro';
+import Photo from './Photo.astro';
+import type { IconName } from './icons';
+import { events } from '../content/events';
+import { timeZone } from '../content/hours';
+import { formatTime } from '../lib/hours';
+import { whatsappLink } from '../config/site';
+
+const today = new Date().toLocaleDateString('sv-SE', { timeZone });
+const upcoming = events.filter((e) => e.date >= today).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+const formatDate = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d, 12));
+  return {
+    day: String(d).padStart(2, '0'),
+    month: date.toLocaleDateString('pt-BR', { month: 'short', timeZone: 'UTC' }).replace('.', ''),
+    full: date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }),
+  };
+};
+
+const occasions: { icon: IconName; title: string; text: string }[] = [
+  { icon: 'users', title: 'Encontros em família', text: 'Mesa farta, conversa boa e tempo para aproveitar juntos.' },
+  { icon: 'glass', title: 'Reunir os amigos', text: 'Um brinde sem pressa, com o sossego do interior ao redor.' },
+  { icon: 'sparkle', title: 'Ocasiões especiais', text: 'Para comemorar, fale antes com a equipe e combine os detalhes.' },
+];
+
+const askLink = whatsappLink(
+  'Olá! Conheci o Restaurante Montanhas de Minas pelo site e gostaria de saber se há música ao vivo ou alguma programação especial.',
+);
+---
+
+<section class="moments section" id="momentos" aria-labelledby="moments-title">
+  <div class="container moments__grid">
+    <div class="moments__art" data-reveal>
+      <svg class="moments__lights" viewBox="0 0 400 80" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path d="M0 10Q200 70 400 10" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".5"></path>
+        {
+          Array.from({ length: 13 }, (_, i) => {
+            const t = (i + 0.5) / 13;
+            const x = 400 * t;
+            const y = 10 + 120 * t * (1 - t) + 4;
+            return <circle cx={x} cy={y} r="3.6" />;
+          })
+        }
+      </svg>
+      <svg
+        class="moments__guitar"
+        viewBox="0 0 120 120"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <g transform="rotate(-28 60 64)">
+          <path d="M60 49a13 13 0 0 1 11 20 17 17 0 1 1-22 0 13 13 0 0 1 11-20Z"></path>
+          <circle cx="60" cy="80" r="5"></circle>
+          <path d="M57 49V16h6v33M56 16l-1-8h10l-1 8M54 94h12"></path>
+          <path d="M60 16v78" opacity=".5"></path>
+        </g>
+        <path d="M86 30c4-2 8 0 8 4M92 20c6-3 12 0 13 6" opacity=".6"></path>
+      </svg>
+      <p class="moments__art-text">Música, conversa <em>e boa comida.</em></p>
+    </div>
+
+    <div class="moments__content">
+      <p class="eyebrow" data-reveal>Música e momentos especiais</p>
+      <h2 class="display moments__title" id="moments-title" data-reveal style="--reveal-delay:100">
+        Bons encontros têm <em>seu próprio ritmo.</em>
+      </h2>
+
+      {
+        upcoming.length > 0 && (
+          <div class="events" data-events>
+            <h3 class="moments__subtitle">Próximos eventos</h3>
+            <ul class="events__list">
+              {upcoming.map((event) => {
+                const date = formatDate(event.date);
+                return (
+                  <li class="event" data-event-date={event.date}>
+                    {event.image && (
+                      <div class="event__image">
+                        <Photo {...event.image} art="guitar" tone="wood" label={false} hint={false} widths={[240, 480]} sizes="160px" />
+                      </div>
+                    )}
+                    <p class="event__date" aria-hidden="true">
+                      <span>{date.day}</span>
+                      {date.month}
+                    </p>
+                    <div class="event__info">
+                      <h4 class="event__name">{event.name}</h4>
+                      <p class="event__when">
+                        <Icon name="calendar" size={16} />
+                        <span>
+                          {date.full}, às {formatTime(event.time)}
+                        </span>
+                      </p>
+                      {event.artist && (
+                        <p class="event__artist">
+                          <Icon name="music" size={16} /> {event.artist}
+                        </p>
+                      )}
+                      {event.description && <p class="event__text">{event.description}</p>}
+                      {event.reservations && <p class="event__reservations">{event.reservations}</p>}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )
+      }
+
+      <div class="occasions" data-events-fallback hidden={upcoming.length > 0}>
+        <p class="moments__lead" data-reveal style="--reveal-delay:180">
+          O Montanhas de Minas é lugar de convivência e descontração: de reunir quem a gente gosta e deixar o tempo
+          passar devagar.
+        </p>
+        <ul class="occasions__list">
+          {
+            occasions.map((item, i) => (
+              <li class="occasion" data-reveal style={`--reveal-delay:${200 + i * 80}`}>
+                <span class="occasion__icon">
+                  <Icon name={item.icon} size={20} />
+                </span>
+                <span>
+                  <h3 class="occasion__title">{item.title}</h3>
+                  <p class="occasion__text">{item.text}</p>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="moments__cta" data-reveal>
+        <a class="btn btn--terracotta" href={askLink} target="_blank" rel="noopener">
+          <Icon name="whatsapp" /> Perguntar sobre a programação<span class="sr-only"> (abre o WhatsApp)</span>
+        </a>
+        <p class="note">Música ao vivo e eventos são divulgados aqui quando confirmados pelo restaurante.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .moments__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: clamp(3rem, 2rem + 5vw, 7rem);
+    align-items: center;
+  }
+
+  .moments__art {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: clamp(360px, 30rem + 6vw, 560px);
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(90% 60% at 50% 20%, rgb(198 161 91 / 0.22), transparent 70%),
+      var(--wood);
+    color: var(--gold-light);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .moments__lights {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    color: var(--gold-light);
+  }
+
+  .moments__lights circle {
+    fill: #ffd98c;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .moments__lights circle {
+      animation: bulb 2.8s ease-in-out infinite alternate;
+    }
+
+    .moments__lights circle:nth-child(odd) {
+      animation-delay: -1.4s;
+    }
+  }
+
+  @keyframes bulb {
+    from {
+      opacity: 0.55;
+    }
+  }
+
+  .moments__guitar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(60%, 260px);
+    transform: translate(-50%, -58%);
+    opacity: 0.9;
+  }
+
+  .moments__art-text {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    line-height: 1.1;
+    color: var(--on-dark);
+  }
+
+  .moments__art-text em {
+    display: block;
+    color: var(--gold-light);
+  }
+
+  .moments__title {
+    margin-top: 1.1rem;
+    max-width: 15ch;
+  }
+
+  .moments__title em {
+    color: var(--terracotta);
+  }
+
+  .moments__lead {
+    max-width: 34rem;
+    margin-top: 1.5rem;
+    font-size: var(--step-1);
+    color: var(--ink-soft);
+  }
+
+  .occasions__list {
+    display: grid;
+    margin-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .occasion {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .occasion__icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--cream);
+    color: var(--terracotta);
+  }
+
+  .occasion__title {
+    font-size: 1.2rem;
+    color: var(--green);
+  }
+
+  .occasion__text {
+    margin-top: 0.15rem;
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+  }
+
+  .moments__subtitle {
+    margin-top: 2rem;
+    font-size: var(--step-2);
+    color: var(--green);
+  }
+
+  .events__list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .event {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--cream);
+  }
+
+  .event__image {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius);
+  }
+
+  .event__image :global(img),
+  .event__image :global(picture),
+  .event__image :global(.photo-placeholder) {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+  }
+
+  .event__date {
+    display: grid;
+    place-items: center;
+    width: 4.25rem;
+    padding: 0.6rem 0;
+    border-radius: var(--radius);
+    background: var(--green);
+    color: var(--gold-light);
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .event__date span {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--on-dark);
+  }
+
+  .event__name {
+    font-size: 1.3rem;
+    color: var(--green);
+  }
+
+  .event__when,
+  .event__artist {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.35rem;
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+  }
+
+  .event__when :global(.icon),
+  .event__artist :global(.icon) {
+    color: var(--terracotta);
+  }
+
+  .event__text,
+  .event__reservations {
+    margin-top: 0.5rem;
+    font-size: 0.9375rem;
+  }
+
+  .event__reservations {
+    font-weight: 600;
+    color: var(--wood);
+  }
+
+  .moments__cta {
+    display: grid;
+    justify-items: start;
+    gap: 0.85rem;
+    margin-top: 2.25rem;
+  }
+
+  @media (max-width: 960px) {
+    .moments__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .moments__art {
+      order: 2;
+      min-height: 320px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .moments__cta .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  import { timeZone } from '../content/hours';
+
+  // Remove do navegador os eventos que já passaram desde o build.
+  const list = document.querySelector<HTMLElement>('[data-events]');
+  if (list) {
+    const today = new Date().toLocaleDateString('sv-SE', { timeZone });
+    list.querySelectorAll<HTMLElement>('[data-event-date]').forEach((item) => {
+      if (item.dataset.eventDate! < today) item.remove();
+    });
+    if (!list.querySelector('[data-event-date]')) {
+      list.remove();
+      document.querySelector<HTMLElement>('[data-events-fallback]')?.removeAttribute('hidden');
+    }
+  }
+</script>

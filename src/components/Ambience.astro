@@ -1,0 +1,158 @@
+---
+import Icon from './Icon.astro';
+import Photo from './Photo.astro';
+import SectionHeading from './SectionHeading.astro';
+import { visibleGallery } from '../content/photos';
+
+/** Composição do mosaico pela posição da foto. */
+const layout = ['feature', 'tall', '', '', 'wide', 'wide', '', ''];
+const tones = ['green', 'cream', 'terracotta', 'cream', 'wood', 'gold', 'cream', 'green'] as const;
+---
+
+<section class="ambience section" id="ambiente" aria-labelledby="ambience-title">
+  <div class="container">
+    <SectionHeading eyebrow="Nosso ambiente" id="ambience-title" align="split">
+      O melhor de Minas é <em>se sentir em casa.</em>
+      <Fragment slot="lead">
+        Mesas para reunir quem a gente gosta, a natureza ao redor e aquele clima de interior que convida a ficar
+        mais um pouco.
+      </Fragment>
+    </SectionHeading>
+
+    <ul class="ambience__grid">
+      {
+        visibleGallery.map((photo, i) => (
+          <li class:list={['ambience__item', layout[i] && `ambience__item--${layout[i]}`]} data-reveal style={`--reveal-delay:${(i % 4) * 70}`}>
+            <button
+              type="button"
+              class="ambience__button"
+              data-lightbox-item="ambiente"
+              data-caption={photo.label}
+              aria-label={`Ampliar imagem ${i + 1} de ${visibleGallery.length}: ${photo.label}`}
+            >
+              <Photo
+                {...photo}
+                label={false}
+                tone={tones[i % tones.length]}
+                sizes={i === 0 ? '(min-width: 900px) 50vw, 100vw' : '(min-width: 900px) 25vw, 50vw'}
+                widths={i === 0 ? [600, 900, 1300] : [360, 600, 900]}
+                zoomable
+              />
+              <span class="ambience__caption">
+                <span>{photo.label}</span>
+                <Icon name="expand" size={18} />
+              </span>
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .ambience :global(.section-title em) {
+    color: var(--terracotta);
+  }
+
+  .ambience__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: clamp(150px, 6rem + 9vw, 260px);
+    grid-auto-flow: dense;
+    gap: clamp(0.5rem, 0.3rem + 0.8vw, 1rem);
+  }
+
+  .ambience__item--feature {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .ambience__item--tall {
+    grid-row: span 2;
+  }
+
+  .ambience__item--wide {
+    grid-column: span 2;
+  }
+
+  .ambience__button {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--radius);
+    background: var(--sand);
+    cursor: zoom-in;
+  }
+
+  .ambience__button :global(img),
+  .ambience__button :global(picture),
+  .ambience__button :global(.photo-placeholder) {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-out);
+  }
+
+  .ambience__button:hover :global(img),
+  .ambience__button:hover :global(.photo-placeholder__art) {
+    transform: scale(1.06);
+  }
+
+  .ambience__caption {
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    color: var(--on-dark);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-align: left;
+  }
+
+  .ambience__caption > span {
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: rgb(20 33 25 / 0.72);
+    backdrop-filter: blur(6px);
+  }
+
+  .ambience__caption :global(.icon) {
+    box-sizing: content-box;
+    padding: 0.35rem;
+    border-radius: 50%;
+    background: rgb(20 33 25 / 0.72);
+    opacity: 0.85;
+    transition: opacity 0.3s var(--ease);
+  }
+
+  .ambience__button:hover .ambience__caption :global(.icon),
+  .ambience__button:focus-visible .ambience__caption :global(.icon) {
+    opacity: 1;
+  }
+
+  .ambience__button :global(.photo-placeholder) {
+    padding-bottom: 3rem;
+  }
+
+  @media (max-width: 860px) {
+    .ambience__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: clamp(140px, 36vw, 240px);
+    }
+
+    .ambience__item:not(.ambience__item--feature) .ambience__button :global(.photo-placeholder__hint) {
+      display: none;
+    }
+  }
+</style>

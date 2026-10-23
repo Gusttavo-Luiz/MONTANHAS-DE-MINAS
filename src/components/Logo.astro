@@ -1,0 +1,80 @@
+---
+/**
+ * Marca tipográfica provisória "Montanhas de Minas · RESTAURANTE".
+ * Substitua pelo logotipo oficial quando houver.
+ */
+interface Props {
+  tone?: 'light' | 'dark';
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const { tone = 'dark', size = 'md' } = Astro.props;
+---
+
+<span class:list={['logo', `logo--${tone}`, `logo--${size}`]}>
+  <svg class="logo__mark" viewBox="0 0 40 32" aria-hidden="true" focusable="false">
+    <circle cx="27" cy="9" r="4" fill="currentColor" opacity=".9"></circle>
+    <path d="M1 29 13 11l6 8 6-7 14 17Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+    <path d="m9.5 16.5 3.5 2.5 3-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+  </svg>
+  <span class="logo__text">
+    <span class="logo__name">Montanhas <i>de</i> Minas</span>
+    <span class="logo__sub">Restaurante</span>
+  </span>
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65em;
+    line-height: 1;
+    color: var(--green);
+    font-size: 1rem;
+  }
+
+  .logo--light {
+    color: var(--on-dark);
+  }
+
+  .logo--sm {
+    font-size: 0.875rem;
+  }
+
+  .logo--lg {
+    font-size: 1.25rem;
+  }
+
+  .logo__mark {
+    width: 2.4em;
+    height: auto;
+    flex: none;
+    color: var(--gold);
+  }
+
+  .logo__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.32em;
+  }
+
+  .logo__name {
+    font-family: var(--font-display);
+    font-size: 1.4em;
+    font-weight: 460;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .logo__name i {
+    font-weight: 360;
+  }
+
+  .logo__sub {
+    font-size: 0.6em;
+    font-weight: 650;
+    letter-spacing: 0.46em;
+    text-transform: uppercase;
+    opacity: 0.82;
+  }
+</style>

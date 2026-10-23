@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/url';
+---
+
+<BaseLayout title="Página não encontrada | Restaurante Montanhas de Minas" description="A página procurada não existe." noindex>
+  <section class="section notfound">
+    <div class="container">
+      <p class="eyebrow">Erro 404</p>
+      <h1 class="display">Essa estradinha não chega a lugar nenhum.</h1>
+      <p class="lead">A página que você procura não existe ou mudou de endereço.</p>
+      <a class="btn" href={withBase('/')}>Voltar para o início</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    padding-top: calc(var(--header-h) + var(--section-space));
+    min-height: 70vh;
+  }
+
+  .notfound .container {
+    display: grid;
+    gap: 1.5rem;
+    justify-items: start;
+    max-width: 52rem;
+  }
+</style>

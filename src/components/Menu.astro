@@ -1,0 +1,296 @@
+---
+import Icon from './Icon.astro';
+import Photo from './Photo.astro';
+import SectionHeading from './SectionHeading.astro';
+import { menuCategories } from '../content/menu';
+import { menuLink } from '../config/site';
+
+const categories = menuCategories.map((category) => ({
+  ...category,
+  highlights: category.highlights.filter((h) => h.confirmed !== false),
+}));
+---
+
+<section class="menu section" id="cardapio" aria-labelledby="menu-title">
+  <div class="container">
+    <SectionHeading eyebrow="Cardápio" id="menu-title" align="split">
+      Uma mesa <em>cheia de sabor.</em>
+      <Fragment slot="lead">Da tradição mineira aos sabores que tornam cada encontro especial.</Fragment>
+    </SectionHeading>
+
+    <ul class="menu__grid">
+      {
+        categories.map((category, i) => (
+          <li class:list={['menu-card', { 'menu-card--wide': i < 2 }]} data-reveal style={`--reveal-delay:${(i % 3) * 90}`}>
+            <article aria-labelledby={`menu-${category.id}`}>
+              <div class="menu-card__media">
+                <Photo
+                  {...category.photo}
+                  art={category.art}
+                  tone={category.tone}
+                  label={false}
+                  hint={false}
+                  sizes={i < 2 ? '(min-width: 900px) 46vw, 100vw' : '(min-width: 900px) 30vw, 100vw'}
+                  widths={[420, 720, 1080]}
+                />
+              </div>
+              <div class="menu-card__body">
+                <p class="menu-card__index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</p>
+                <h3 class="menu-card__title" id={`menu-${category.id}`}>{category.title}</h3>
+                <p class="menu-card__text">{category.description}</p>
+                {category.highlights.length > 0 && (
+                  <ul class="menu-card__tags" aria-label="Destaques da categoria">
+                    {category.highlights.map((h) => <li>{h.label}</li>)}
+                  </ul>
+                )}
+                {category.items.length > 0 && (
+                  <ul class="menu-card__items">
+                    {category.items.map((item) => (
+                      <li>
+                        <span class="menu-card__item-name">
+                          {item.name}
+                          {item.description && <small>{item.description}</small>}
+                        </span>
+                        {item.price && <span class="menu-card__item-price">{item.price}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="menu__cta" data-reveal>
+      <p class="menu__cta-text">
+        <Icon name="info" size={20} />
+        <span>Pratos, preços e disponibilidade seguem o cardápio vigente do restaurante.</span>
+      </p>
+      <a class="btn btn--lg" href={menuLink.href} target="_blank" rel="noopener">
+        Consultar cardápio completo <Icon name={menuLink.viaWhatsapp ? 'whatsapp' : 'arrowRight'} class="icon--move" />
+        <span class="sr-only">{menuLink.viaWhatsapp ? '(abre uma conversa no WhatsApp)' : '(abre em nova aba)'}</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .menu {
+    background: var(--cream);
+  }
+
+  .menu :global(.section-title em) {
+    color: var(--terracotta);
+  }
+
+  .menu__grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: clamp(1rem, 0.6rem + 1.4vw, 1.75rem);
+  }
+
+  .menu-card {
+    grid-column: span 2;
+  }
+
+  .menu-card--wide {
+    grid-column: span 3;
+  }
+
+  .menu-card article {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--cream-light);
+    box-shadow: var(--shadow-soft);
+    transition:
+      transform 0.5s var(--ease-out),
+      box-shadow 0.5s var(--ease-out);
+  }
+
+  .menu-card article:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .menu-card__media {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  .menu-card--wide .menu-card__media {
+    aspect-ratio: 16 / 9;
+  }
+
+  .menu-card__media :global(img),
+  .menu-card__media :global(picture),
+  .menu-card__media :global(.photo-placeholder) {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-out);
+  }
+
+  .menu-card__media :global(.photo-placeholder__art) {
+    width: clamp(84px, 32%, 150px);
+  }
+
+  .menu-card--wide .menu-card__media :global(.photo-placeholder__art) {
+    width: clamp(90px, 24%, 160px);
+  }
+
+  .menu-card article:hover .menu-card__media :global(img),
+  .menu-card article:hover .menu-card__media :global(.photo-placeholder__art) {
+    transform: scale(1.06);
+  }
+
+  .menu-card__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: clamp(1.25rem, 1rem + 1vw, 1.9rem);
+  }
+
+  .menu-card__index {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-style: italic;
+    color: var(--terracotta);
+  }
+
+  .menu-card__title {
+    margin-top: 0.35rem;
+    font-size: var(--step-2);
+    color: var(--green);
+  }
+
+  .menu-card__text {
+    margin-top: 0.6rem;
+    color: var(--ink-soft);
+    font-size: 0.9688rem;
+  }
+
+  .menu-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: auto;
+    padding-top: 1.25rem;
+  }
+
+  .menu-card__tags li {
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 550;
+    color: var(--wood);
+  }
+
+  .menu-card__items {
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .menu-card__items li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.6rem;
+    border-bottom: 1px dashed var(--line-strong);
+  }
+
+  .menu-card__item-name {
+    display: grid;
+    font-weight: 600;
+  }
+
+  .menu-card__item-name small {
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+
+  .menu-card__item-price {
+    font-family: var(--font-display);
+    color: var(--terracotta);
+    white-space: nowrap;
+  }
+
+  .menu__cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem 2rem;
+    margin-top: clamp(2rem, 1.5rem + 2vw, 3rem);
+    padding: clamp(1.25rem, 1rem + 1vw, 1.75rem) clamp(1.25rem, 1rem + 1.5vw, 2.25rem);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+  }
+
+  .menu__cta-text {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    max-width: 34rem;
+    color: var(--ink-soft);
+  }
+
+  .menu__cta-text :global(.icon) {
+    flex: none;
+    margin-top: 0.15rem;
+    color: var(--terracotta);
+  }
+
+  @media (max-width: 980px) {
+    .menu__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .menu-card,
+    .menu-card--wide {
+      grid-column: span 1;
+    }
+
+    .menu-card:first-child {
+      grid-column: span 2;
+    }
+
+    .menu-card--wide .menu-card__media {
+      aspect-ratio: 4 / 3;
+    }
+
+    .menu-card:first-child .menu-card__media {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .menu__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .menu-card:first-child {
+      grid-column: auto;
+    }
+
+    .menu-card .menu-card__media,
+    .menu-card:first-child .menu-card__media {
+      aspect-ratio: 16 / 10;
+    }
+
+    .menu__cta {
+      padding: 1.25rem;
+    }
+
+    .menu__cta .btn {
+      width: 100%;
+      padding-inline: 1.25rem;
+    }
+  }
+</style>
